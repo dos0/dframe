@@ -1,0 +1,18 @@
+{
+  "name": "dos0/framework",
+  "description": "dos0 FW",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Serhii Dolhopolov",
+      "email": "do_s@ukr.net"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Dos0\\Framework\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "require": {}
+}
