@@ -92,10 +92,10 @@ class Response
     /**
      * Response constructor.
      *
-     * @param string $data
+     * @param $data
      * @param int $code
      */
-    public function __construct(string $data = '', int $code = 200)
+    public function __construct($data = '', int $code = 200)
     {
         $this->data = $data;
         $this->code = $code;

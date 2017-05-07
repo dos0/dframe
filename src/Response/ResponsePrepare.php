@@ -72,9 +72,9 @@ class ResponsePrepare
     }
 
     /**
-     * @param string $data
+     * @param $data
      */
-    public function setData(string $data)
+    public function setData($data)
     {
         $this->data = $data;
     }
