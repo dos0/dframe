@@ -87,7 +87,7 @@ class Router
                 $routeResult->setController($route['controllerName']);
                 $routeResult->setMethod($route['controllerMethod']);
 
-                $routeResult->setParams($params);;
+                $routeResult->setParams($params);
             }
         }
 
