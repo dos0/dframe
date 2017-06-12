@@ -167,7 +167,7 @@ class Response
      */
     public function sendContent()
     {
-        echo "Hi!";
+        echo $this->data;
     }
 
 }
