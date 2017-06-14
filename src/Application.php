@@ -3,8 +3,10 @@ namespace Dos0\Framework;
 
 use Dos0\Framework\Exception\ControllerIsNotFoundException;
 use Dos0\Framework\Exception\MethodOfControllerIsNotFoundException;
+use Dos0\Framework\Render\Render;
 use Dos0\Framework\Request\Request;
 use Dos0\Framework\Response\ResponsePrepare;
+use Dos0\Framework\Router\Exception\RouteIsNotFoundException;
 use Dos0\Framework\Router\Route;
 use Dos0\Framework\Router\Router;
 
@@ -14,39 +16,54 @@ use Dos0\Framework\Router\Router;
  */
 class Application
 {
-    private $config;
+    // @todo Config вынести в DI
+    private static $config;
+
     private $request;
 
-    public function __construct($config = [])
+    // @todo Render вынести в DI
+    private $render;
+
+    public function __construct($routes = [])
     {
-        $this->config = $config;
+        self::$config = require '../config/main.php';
+
+        self::$config['routes'] = $routes;
+
+        $this->render = new Render(self::getConfig()['systemViewPath']);
     }
 
     public function run()
     {
         $this->request = new Request();
+        $responsePrepare = new ResponsePrepare($this->request);
 
         try {
-            $router = new Router($this->config);
 
+            $router = new Router(self::$config['routes']);
             $route = $router->getRoute($this->request);
 
-            $controllerResult = $this->getControllerResult($route);
+            // @todo Сделать обработчик для json ответов
+            $responsePrepare->setData(
+                $this->getControllerResult($route)
+            );
 
-            $responsePrepare = new ResponsePrepare($this->request);
-            $responsePrepare->setData($controllerResult);
-
-            $response = $responsePrepare->make();
-
-            $response->send();
-
-            //return $response;
+        } catch (RouteIsNotFoundException $e) {
+            $responsePrepare->setCode(404);
+            $responsePrepare->setData(
+                $this->getErrorData(404, $e->getMessage())
+            );
 
         } catch (\Exception $e) {
+            $responsePrepare->setCode(500);
+            $responsePrepare->setData(
+                $this->getErrorData(500, $e->getMessage())
+            );
 
-            echo "<h3>Exception: {$e->getMessage()} </h3>\n";
         }
 
+        $response = $responsePrepare->make();
+        $response->send();
     }
 
     public function __destruct()
@@ -54,6 +71,14 @@ class Application
         //@TODO: Close active connections, etc.
     }
 
+    /**
+     * Gets result of controller method
+     *
+     * @param Route $route
+     * @return mixed
+     * @throws ControllerIsNotFoundException
+     * @throws MethodOfControllerIsNotFoundException
+     */
     private function getControllerResult(Route $route)
     {
         if (!class_exists($route->getController())) {
@@ -71,4 +96,39 @@ class Application
 
         return $reflectionMethod->invokeArgs($controller, $route->getParams());
     }
-};
+
+    /**
+     * Gets application config
+     *
+     * @return array
+     */
+    public static function getConfig(): array
+    {
+        return self::$config;
+    }
+
+    /**
+     * Get data error string
+     *
+     * @param int $code
+     * @param string $errorMessage
+     * @return string
+     */
+    private function getErrorData(int $code, string $errorMessage): string
+    {
+        if ($this->request->isJson()) {
+            $errorData =
+                '{
+                    "result": "error", 
+                    "code": ' . $code . ', 
+                    "message": "' . $errorMessage . '"
+                }';
+        } else {
+            $errorData = $this->render->render($code . '.html.php', ['message' => $errorMessage]);
+        }
+
+        return $errorData;
+    }
+}
+
+;
