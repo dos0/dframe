@@ -2,6 +2,7 @@
 
 namespace Dos0\Framework\Controller;
 
+use Dos0\Framework\Application;
 use Dos0\Framework\Render\Render;
 
 /**
@@ -12,6 +13,9 @@ use Dos0\Framework\Render\Render;
  */
 abstract class Controller
 {
+
+    // @todo перенести функции renderPartial в Render
+
     /**
      * @var Render
      */
@@ -22,8 +26,7 @@ abstract class Controller
      */
     public function __construct()
     {
-        // $todo вынести ссылку на вьюхи в файл конфигурации
-        $this->renderer = new Render(__DIR__ . '/../views');
+        $this->renderer = new Render(Application::getConfig()['systemViewPath']);
     }
 
     /**
@@ -35,9 +38,9 @@ abstract class Controller
      */
     public function render(string $viewFileName, array $params = []): string
     {
-        $output = $this->renderPartital($viewFileName, $params);
+        $output = $this->renderPartial($viewFileName, $params);
 
-        $output = $this->renderPartital('layout.html.php', ['content' => $output]);
+        $output = $this->renderPartial('layout.html.php', ['content' => $output]);
 
         return $output;
     }
@@ -49,7 +52,7 @@ abstract class Controller
      * @param array $params
      * @return string
      */
-    public function renderPartital(string $viewFileName, array $params = []): string
+    public function renderPartial(string $viewFileName, array $params = []): string
     {
         $output = $this->renderer->render($viewFileName, $params);
 
