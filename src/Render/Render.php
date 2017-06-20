@@ -11,41 +11,61 @@ use Dos0\Framework\Render\Exeption\ViewFileNotFoundException;
  */
 class Render
 {
-    /**
-     * Contents path to view
-     *
-     * @var string
-     */
-    private $viewPath = '';
 
+    // @todo перенести функции renderPartial из Controller
 
-    public function __construct(string $viewPath)
+    private $systemViewPath = '';
+    private $userViewPath = '';
+
+    public function __construct(array $viewPaths = [])
     {
-        if (!is_dir($viewPath)) {
-            throw new ViewDirNotFoundException('View Dir ' . $viewPath . ' Not Found Exception');
+        if (
+            !array_key_exists('systemViewPath', $viewPaths)
+            || !is_dir($viewPaths['systemViewPath'])
+        ) {
+            throw new ViewDirNotFoundException('Framework View Dir ' . $viewPaths['systemViewPath'] . ' Not Found Exception');
         }
-        $this->viewPath = $viewPath;
+
+        if (
+            array_key_exists('userViewPath', $viewPaths)
+            && !is_dir($viewPaths['userViewPath'])
+        ) {
+            throw new ViewDirNotFoundException('Application View Dir ' . $viewPaths['userViewPath'] . ' Not Found Exception');
+        }
+
+        $this->systemViewPath = $viewPaths['systemViewPath'];
+        $this->userViewPath = empty($viewPaths['userViewPath']) ? '' : $viewPaths['userViewPath'];
     }
 
-    public function getViewPath(): string
+    public function getUserViewPath(): string
     {
-        return $this->viewPath;
+        return $this->userViewPath;
     }
 
-    public function setViewPath(string $viewPath)
+    public function setUserViewPath(string $userViewPath)
     {
-        $this->viewPath = $viewPath;
+        $this->userViewPath = $userViewPath;
+    }
+
+    public function getSystemViewPath(): string
+    {
+        return $this->systemViewPath;
     }
 
     public function render(string $viewFileName, array $params = []): string
     {
-        $viewFile = $this->viewPath . '/' . $viewFileName;
+        $userViewFile = $this->userViewPath . '/' . $viewFileName;
+        $systemViewFile = $this->systemViewPath . '/' . $viewFileName;
 
-        if (!file_exists($viewFile)) {
-            throw new ViewFileNotFoundException('View File ' . $viewFile . ' Not Found Exception');
+        if (file_exists($userViewFile)) {
+            $output = file_get_contents($userViewFile);
+
+        } elseif (file_exists($systemViewFile)) {
+            $output = file_get_contents($systemViewFile);
+
+        } else {
+            throw new ViewFileNotFoundException('View File ' . $userViewFile . ' Not Found Exception');
         }
-
-        $output = file_get_contents($viewFile);
 
         foreach ($params as $key => $value) {
             $output = str_replace('{' . $key . '}', $value, $output);

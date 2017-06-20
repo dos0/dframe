@@ -16,26 +16,27 @@ use Dos0\Framework\Router\Router;
  */
 class Application
 {
-    // @todo Config вынести в DI
+
+    const FRAMEWORK_CONFIG_FILE = 'config/main.php';
+
+    // @todo config вынести в DI
+    private $render;
     private static $config;
 
     private $request;
 
-    // @todo Render вынести в DI
-    private $render;
-
-    public function __construct($routes = [])
+    public function __construct($config = [])
     {
-        self::$config = require '../config/main.php';
+        $fwConfig = require self::FRAMEWORK_CONFIG_FILE;
 
-        self::$config['routes'] = $routes;
+        self::$config = array_merge_recursive($fwConfig, $config);
 
-        $this->render = new Render(self::getConfig()['systemViewPath']);
+        $this->render = new Render(self::getConfig()['render']);
+        $this->request = new Request();
     }
 
     public function run()
     {
-        $this->request = new Request();
         $responsePrepare = new ResponsePrepare($this->request);
 
         try {

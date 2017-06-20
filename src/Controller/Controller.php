@@ -26,7 +26,7 @@ abstract class Controller
      */
     public function __construct()
     {
-        $this->renderer = new Render(Application::getConfig()['systemViewPath']);
+        $this->renderer = new Render(Application::getConfig()['render']);
     }
 
     /**

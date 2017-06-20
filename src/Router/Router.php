@@ -11,6 +11,8 @@ use Dos0\Framework\Router\Exception\PatternOfRouteNotExistsException;
 use Dos0\Framework\Router\Exception\ParamsOfVariableIsNotMatchedException;
 use Dos0\Framework\Request\Request;
 
+
+// @todo Проверить правильную обработку путей роутера в зависимости от типа запроса (Post, get, etc.)
 class Router
 {
     /**
