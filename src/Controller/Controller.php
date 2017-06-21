@@ -2,7 +2,7 @@
 
 namespace Dos0\Framework\Controller;
 
-use Dos0\Framework\Application;
+use Dos0\Framework\DI\DIInjector;
 use Dos0\Framework\Render\Render;
 
 /**
@@ -26,7 +26,7 @@ abstract class Controller
      */
     public function __construct()
     {
-        $this->renderer = new Render(Application::getConfig()['render']);
+        $this->renderer = new Render(DIInjector::getConfig()['render']);
     }
 
     /**

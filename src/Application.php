@@ -1,14 +1,15 @@
 <?php
 namespace Dos0\Framework;
 
+use Dos0\Framework\DI\DIInjector;
 use Dos0\Framework\Exception\ControllerIsNotFoundException;
 use Dos0\Framework\Exception\MethodOfControllerIsNotFoundException;
 use Dos0\Framework\Render\Render;
 use Dos0\Framework\Request\Request;
 use Dos0\Framework\Response\ResponsePrepare;
+use Dos0\Framework\Router\Router;
 use Dos0\Framework\Router\Exception\RouteIsNotFoundException;
 use Dos0\Framework\Router\Route;
-use Dos0\Framework\Router\Router;
 
 /**
  * Class Application
@@ -16,33 +17,27 @@ use Dos0\Framework\Router\Router;
  */
 class Application
 {
-
-    const FRAMEWORK_CONFIG_FILE = 'config/main.php';
-
-    // @todo config вынести в DI
-    private $render;
-    private static $config;
-
-    private $request;
+    const FRAMEWORK_CONFIG_FILE = __DIR__ . '/config/main.php';
 
     public function __construct($config = [])
     {
-        $fwConfig = require self::FRAMEWORK_CONFIG_FILE;
-
-        self::$config = array_merge_recursive($fwConfig, $config);
-
-        $this->render = new Render(self::getConfig()['render']);
-        $this->request = new Request();
+        DIInjector::setConfig(array_merge_recursive(
+            require self::FRAMEWORK_CONFIG_FILE, $config));
     }
 
     public function run()
     {
-        $responsePrepare = new ResponsePrepare($this->request);
+        /* @var ResponsePrepare $responsePrepare */
+        $responsePrepare = DIInjector::get('ResponsePrepare');
 
         try {
+            /* @var Router $router */
+            $router = DIInjector::get('Router', ['config' => DIInjector::getConfig()]);
 
-            $router = new Router(self::$config['routes']);
-            $route = $router->getRoute($this->request);
+            /* @var Request $request */
+            $request = DIInjector::get('Request');
+
+            $route = $router->getRoute($request);
 
             // @todo Сделать обработчик для json ответов
             $responsePrepare->setData(
@@ -50,17 +45,14 @@ class Application
             );
 
         } catch (RouteIsNotFoundException $e) {
-            $responsePrepare->setCode(404);
-            $responsePrepare->setData(
+            $responsePrepare->setCodeAndData(404,
                 $this->getErrorData(404, $e->getMessage())
             );
 
         } catch (\Exception $e) {
-            $responsePrepare->setCode(500);
-            $responsePrepare->setData(
+            $responsePrepare->setCodeAndData(500,
                 $this->getErrorData(500, $e->getMessage())
             );
-
         }
 
         $response = $responsePrepare->make();
@@ -99,16 +91,6 @@ class Application
     }
 
     /**
-     * Gets application config
-     *
-     * @return array
-     */
-    public static function getConfig(): array
-    {
-        return self::$config;
-    }
-
-    /**
      * Get data error string
      *
      * @param int $code
@@ -117,7 +99,7 @@ class Application
      */
     private function getErrorData(int $code, string $errorMessage): string
     {
-        if ($this->request->isJson()) {
+        if (DIInjector::get('Request')->isJson()) {
             $errorData =
                 '{
                     "result": "error", 
@@ -125,11 +107,23 @@ class Application
                     "message": "' . $errorMessage . '"
                 }';
         } else {
-            $errorData = $this->render->render($code . '.html.php', ['message' => $errorMessage]);
+            /* @var Render $render */
+            $render = DIInjector::get(
+                'Render', ['viewPaths' => DIInjector::getConfig()['render']]);
+
+            $errorData = $render->render($code . '.html.php', ['message' => $errorMessage]);
         }
 
         return $errorData;
     }
 }
 
-;
+
+
+
+function debug($param)
+{
+    echo "<pre>";
+    print_r($param);
+    echo "</pre>";
+}

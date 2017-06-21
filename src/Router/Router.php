@@ -32,9 +32,9 @@ class Router
      */
     public function __construct(array $config)
     {
-        foreach ($config as $key => $value) {
+        foreach ($config['routes'] as $key => $value) {
 
-            if (!array_key_exists($key, $config)) {
+            if (!array_key_exists($key, $config['routes'])) {
                 throw new RouteKeyNotExistsException("Route Key '$key' Not Exist");
             }
             if (empty($value['pattern'])) {

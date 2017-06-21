@@ -80,6 +80,16 @@ class ResponsePrepare
     }
 
     /**
+     * @param int $code
+     * @param $data
+     */
+    public function setCodeAndData(int $code = 200, $data)
+    {
+        $this->code = $code;
+        $this->data = $data;
+    }
+
+    /**
      * Makes the Response class from type
      *
      * @param string $type
