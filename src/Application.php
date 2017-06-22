@@ -44,8 +44,6 @@ class Application
             // Middleware
             DIInjector::get('Middleware');
 
-            debug('<hr>');
-
             // @todo Сделать обработчик для json ответов
             $responsePrepare->setData(
                 $this->getControllerResult($route)

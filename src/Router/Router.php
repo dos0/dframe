@@ -75,8 +75,7 @@ class Router
             if (preg_match('/' . $route['regexpPattern'] . '/U', $request->getUri(), $matches)) {
 
                 $params = [];
-
-                if (count($matches) > 2) {
+                if (count($matches) >= 2) {
                     array_shift($matches);
 
                     foreach ($route['variables'] as $variable) {
