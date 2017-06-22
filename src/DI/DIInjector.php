@@ -24,7 +24,7 @@ class DIInjector
      *
      * @var array
      */
-    private static $mapping = [];
+    private static $serviceMap = [];
 
     /**
      * Array of existed services
@@ -39,7 +39,7 @@ class DIInjector
     public static function setConfig(array $config)
     {
         self::$config = $config;
-        self::$mapping = $config['services'];
+        self::$serviceMap = $config['serviceMap'];
     }
 
     /**
@@ -112,10 +112,10 @@ class DIInjector
             return self::$services[$className] = new $className();
         }
 
-        if (!array_key_exists($className, self::$mapping)) {
+        if (!array_key_exists($className, self::$serviceMap)) {
             throw new ServiceKeyNotFoundException('Service Key ' . $className . ' Not Found Exception');
         }
-        $className = self::$mapping[$className];
+        $className = self::$serviceMap[$className];
         if (!class_exists($className)) {
             throw new ServiceClassIsNotExistException('Service Class ' . $className . ' Is Not Exist Exception');
         }
