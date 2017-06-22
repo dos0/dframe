@@ -31,6 +31,13 @@ class Route
     private $params = [];
 
     /**
+     * Array of middlewares
+     *
+     * @var array
+     */
+    private $middleware = [];
+
+    /**
      * Returns params array
      *
      * @return array
@@ -94,5 +101,21 @@ class Route
     public function setName(string $name)
     {
         $this->name = $name;
+    }
+
+    /**
+     * @return array
+     */
+    public function getMiddleware(): array
+    {
+        return $this->middleware;
+    }
+
+    /**
+     * @param array $middleware
+     */
+    public function setMiddleware(array $middleware)
+    {
+        $this->middleware = $middleware;
     }
 }

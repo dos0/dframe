@@ -4,6 +4,7 @@ namespace Dos0\Framework;
 use Dos0\Framework\DI\DIInjector;
 use Dos0\Framework\Exception\ControllerIsNotFoundException;
 use Dos0\Framework\Exception\MethodOfControllerIsNotFoundException;
+use Dos0\Framework\Middleware\Middleware;
 use Dos0\Framework\Render\Render;
 use Dos0\Framework\Request\Request;
 use Dos0\Framework\Response\ResponsePrepare;
@@ -37,7 +38,13 @@ class Application
             /* @var Request $request */
             $request = DIInjector::get('Request');
 
-            $route = $router->getRoute($request);
+            DIInjector::set(Route::class, $router->getRoute($request));
+            $route = DIInjector::get('Route');
+
+            // Middleware
+            DIInjector::get('Middleware');
+
+            debug('<hr>');
 
             // @todo Сделать обработчик для json ответов
             $responsePrepare->setData(

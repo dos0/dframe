@@ -47,14 +47,15 @@ class Router
             $variables = $this->getVariables($value['pattern']);
 
             $this->routes[$key] = [
-                'method' => isset($value['method']) ? $value['method'] : 'GET',
-                'controllerName' => $this->getControllerName($value),
-                'controllerMethod' => $this->getControllerMethod($value),
+                'method'            => isset($value['method']) ? $value['method'] : 'GET',
+                'controllerName'    => $this->getControllerName($value),
+                'controllerMethod'  => $this->getControllerMethod($value),
 
-                'variables' => $variables,
-                'regexpPattern' => $this->getRegexpPattern($value['pattern'], $variables),
+                'variables'         => $variables,
+                'regexpPattern'     => $this->getRegexpPattern($value['pattern'], $variables),
 
-                'pattern' => $value['pattern'],
+                'pattern'           => $value['pattern'],
+                'middleware'        => isset($value['middleware']) ? $value['middleware'] : []
             ];
         }
 
@@ -90,6 +91,7 @@ class Router
                 $routeResult->setMethod($route['controllerMethod']);
 
                 $routeResult->setParams($params);
+                $routeResult->setMiddleware($route['middleware']);
             }
         }
 
